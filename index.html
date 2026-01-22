@@ -1,0 +1,841 @@
+<html lang="en" dir="ltr"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tone.js for audio synthesis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <title>Dasco Asset System</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { height: 6px; width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+
+        /* Modal Transitions & Styling */
+        .modal-backdrop { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: rgba(15, 23, 42, 0.6); 
+            display: flex; justify-content: center; align-items: center; 
+            z-index: 50; opacity: 0; pointer-events: none; 
+            transition: opacity 0.2s ease-in-out; 
+            backdrop-filter: blur(2px);
+        }
+        .modal-backdrop.visible { opacity: 1; pointer-events: auto; }
+        
+        .modal-content { 
+            background-color: #ffffff; 
+            padding: 1.5rem; 
+            border-radius: 0.75rem; 
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); 
+            width: 90%; 
+            max-width: 600px;
+            transform: scale(0.95); 
+            transition: transform 0.2s ease-in-out; 
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-backdrop.visible .modal-content { transform: scale(1); }
+
+        /* Print styles */
+        @media print {
+            body > *:not(#printable-content) { display: none !important; }
+            #printable-content { display: block !important; width: 100%; position: absolute; top: 0; left: 0; padding: 20px; background: white; z-index: 9999; }
+            #printable-content table { width: 100%; border-collapse: collapse; direction: ltr; margin-top: 20px; }
+            #printable-content th, #printable-content td { border: 1px solid #000; padding: 8px; text-align: left; font-size: 12px; }
+            #printable-content th { background-color: #f1f5f9; font-weight: bold; }
+            #printable-content h2 { text-align: center; margin-bottom: 10px; font-size: 24px; font-weight: bold; }
+            #printable-content .print-meta { text-align: center; margin-bottom: 20px; font-size: 12px; color: #666; }
+            #printable-content .stats-box { display: flex; justify-content: space-around; margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; }
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.visible{visibility:visible}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.right-0{right:0px}.top-0{top:0px}.z-10{z-index:10}.z-20{z-index:20}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-4{margin-top:1rem}.mt-8{margin-top:2rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-20{height:5rem}.h-full{height:100%}.h-screen{height:100vh}.w-full{width:100%}.max-w-7xl{max-width:80rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.cursor-pointer{cursor:pointer}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-slate-100 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(241 245 249 / var(--tw-divide-opacity, 1))}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.whitespace-nowrap{white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-full{border-radius:9999px}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-b-4{border-bottom-width:4px}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.border-emerald-500{--tw-border-opacity:1;border-color:rgb(16 185 129 / var(--tw-border-opacity, 1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.border-slate-50{--tw-border-opacity:1;border-color:rgb(248 250 252 / var(--tw-border-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-green-600{--tw-bg-opacity:1;background-color:rgb(22 163 74 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-red-100{--tw-bg-opacity:1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.from-blue-500{--tw-gradient-from:#3b82f6 var(--tw-gradient-from-position);--tw-gradient-to:rgb(59 130 246 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-500{--tw-gradient-from:#10b981 var(--tw-gradient-from-position);--tw-gradient-to:rgb(16 185 129 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-red-500{--tw-gradient-from:#ef4444 var(--tw-gradient-from-position);--tw-gradient-to:rgb(239 68 68 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-blue-700{--tw-gradient-to:#1d4ed8 var(--tw-gradient-to-position)}.to-emerald-700{--tw-gradient-to:#047857 var(--tw-gradient-to-position)}.to-red-700{--tw-gradient-to:#b91c1c var(--tw-gradient-to-position)}.p-1{padding:0.25rem}.p-2{padding:0.5rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-8{padding:2rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.pb-3{padding-bottom:0.75rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[8px\]{font-size:8px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-tight{line-height:1.25}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.tracking-widest{letter-spacing:0.1em}.text-blue-100{--tw-text-opacity:1;color:rgb(219 234 254 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-emerald-100{--tw-text-opacity:1;color:rgb(209 250 229 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-red-100{--tw-text-opacity:1;color:rgb(254 226 226 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.opacity-20{opacity:0.2}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:-translate-y-1:hover{--tw-translate-y:-0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.hover\:bg-green-700:hover{--tw-bg-opacity:1;background-color:rgb(21 128 61 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-700:hover{--tw-bg-opacity:1;background-color:rgb(67 56 202 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-300:hover{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.hover\:text-red-500:hover{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.hover\:text-blue-500:hover{--tw-text-opacity:1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}.hover\:shadow-lg:hover{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-blue-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(59 130 246 / var(--tw-ring-opacity, 1))}@media (min-width: 768px){.md\:mt-1{margin-top:0.25rem}.md\:h-24{height:6rem}.md\:w-1\/2{width:50%}.md\:w-auto{width:auto}.md\:flex-initial{flex:0 1 auto}.md\:flex-row{flex-direction:row}.md\:gap-6{gap:1.5rem}.md\:space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.md\:rounded-xl{border-radius:0.75rem}.md\:p-3{padding:0.75rem}.md\:p-4{padding:1rem}.md\:p-6{padding:1.5rem}.md\:px-6{padding-left:1.5rem;padding-right:1.5rem}.md\:py-4{padding-top:1rem;padding-bottom:1rem}.md\:px-3{padding-left:0.75rem;padding-right:0.75rem}.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}.md\:text-5xl{font-size:3rem;line-height:1}.md\:text-\[10px\]{font-size:10px}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-sm{font-size:0.875rem;line-height:1.25rem}.md\:text-xs{font-size:0.75rem;line-height:1rem}}</style></head>
+<body class="h-screen flex flex-col overflow-hidden text-slate-800">
+
+    <!-- Top Header -->
+    <header class="bg-white border-b border-slate-200 px-4 py-3 md:px-6 md:py-4 flex flex-col justify-center items-center shrink-0 shadow-sm relative z-20">
+        <h1 class="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">Dasco <span class="text-blue-600">Asset</span></h1>
+        <div class="text-[8px] md:text-[10px] text-slate-400 font-medium tracking-widest mt-1 uppercase">DEVELOPED BY AHMED EMAM</div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow overflow-auto bg-slate-50 flex flex-col">
+        
+        <div class="flex-grow overflow-auto p-2 md:p-6">
+            <div class="max-w-7xl mx-auto h-full flex flex-col relative space-y-4 md:space-y-6">
+
+                <!-- Stats Dashboard (Cards trigger Report Modal) -->
+                <div class="grid grid-cols-3 gap-2 md:gap-6">
+                    <!-- Green Card: Working & In Use -->
+                    <div onclick="App.openReport('used')" class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-lg md:rounded-xl shadow-md p-2 md:p-4 text-white relative overflow-hidden h-20 md:h-24 flex flex-col justify-center hover:shadow-lg transition-transform hover:-translate-y-1 cursor-pointer" title="Click to Print Report">
+                        <div class="absolute top-0 right-0 p-1 md:p-3 opacity-20"><i class="fas fa-industry text-3xl md:text-5xl"></i></div>
+                        <span class="text-emerald-100 text-[10px] md:text-xs font-bold uppercase tracking-wider relative z-10 leading-tight">WORKING (USE)</span>
+                        <span id="stat-working-used" class="text-xl md:text-3xl font-bold relative z-10 mt-0.5 md:mt-1">3</span>
+                    </div>
+
+                    <!-- Blue Card: Working & In Stock -->
+                    <div onclick="App.openReport('stock')" class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg md:rounded-xl shadow-md p-2 md:p-4 text-white relative overflow-hidden h-20 md:h-24 flex flex-col justify-center hover:shadow-lg transition-transform hover:-translate-y-1 cursor-pointer" title="Click to Print Report">
+                        <div class="absolute top-0 right-0 p-1 md:p-3 opacity-20"><i class="fas fa-boxes text-3xl md:text-5xl"></i></div>
+                        <span class="text-blue-100 text-[10px] md:text-xs font-bold uppercase tracking-wider relative z-10 leading-tight">WORKING (STOCK)</span>
+                        <span id="stat-working-stock" class="text-xl md:text-3xl font-bold relative z-10 mt-0.5 md:mt-1">2</span>
+                    </div>
+
+                    <!-- Red Card: Not Working / Maintenance -->
+                    <div onclick="App.openReport('broken')" class="bg-gradient-to-br from-red-500 to-red-700 rounded-lg md:rounded-xl shadow-md p-2 md:p-4 text-white relative overflow-hidden h-20 md:h-24 flex flex-col justify-center hover:shadow-lg transition-transform hover:-translate-y-1 cursor-pointer" title="Click to Print Report">
+                        <div class="absolute top-0 right-0 p-1 md:p-3 opacity-20"><i class="fas fa-wrench text-3xl md:text-5xl"></i></div>
+                        <span class="text-red-100 text-[10px] md:text-xs font-bold uppercase tracking-wider relative z-10 leading-tight">MAINTENANCE</span>
+                        <span id="stat-broken" class="text-xl md:text-3xl font-bold relative z-10 mt-0.5 md:mt-1">1</span>
+                    </div>
+                </div>
+
+                <!-- Toolbar (Search, Export & Add) -->
+                <div class="flex flex-col md:flex-row justify-between items-center gap-3 bg-white p-3 md:p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="w-full md:w-1/2 relative flex gap-2">
+                        <input type="text" id="main-search-input" placeholder="Search..." class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition text-sm">
+                        <button onclick="App.handleMainSearch()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shrink-0 text-sm">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="w-full md:w-auto flex gap-2">
+                         <button onclick="App.exportData()" class="flex-1 md:flex-initial bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 shadow-sm text-sm">
+                            <i class="fas fa-file-export"></i> Backup
+                        </button>
+                        <button onclick="App.openAddModal()" class="flex-1 md:flex-initial bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 shadow-sm text-sm">
+                            <i class="fas fa-plus-circle"></i> Add Item
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content Table (Always shows ALL items) -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex-grow overflow-hidden flex flex-col">
+                    <div class="p-3 md:p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                        <h3 class="font-bold text-slate-700 text-sm md:text-base">Asset Log (All Items)</h3>
+                        <span class="text-xs text-slate-500 bg-white px-2 py-1 rounded border" id="total-items-badge">Count: 6</span>
+                    </div>
+                    <div class="overflow-auto flex-grow">
+                        <table class="w-full text-xs md:text-sm text-left whitespace-nowrap">
+                            <thead class="bg-slate-50 text-slate-600 sticky top-0">
+                                <tr>
+                                    <th class="p-3 font-bold border-b">Name</th>
+                                    <th class="p-3 font-bold border-b">Serial</th>
+                                    <th class="p-3 font-bold border-b">Location</th>
+                                    <th class="p-3 font-bold border-b">Status</th>
+                                    <th class="p-3 font-bold border-b text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assets-table-body" class="divide-y divide-slate-100">
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50 group">
+                        <td class="p-3 font-semibold text-slate-700">Pump</td>
+                        <td class="p-3 font-mono text-slate-500 text-[10px] md:text-xs">2025</td>
+                        <td class="p-3 text-slate-600">Free zone</td>
+                        <td class="p-3"><span class="bg-blue-100 text-blue-700 px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold"><i class="fas fa-box"></i> Stock</span></td>
+                        <td class="p-3 text-center">
+                            <div class="flex justify-center gap-2">
+                                <button onclick="App.editItem(1769085503206)" class="text-slate-300 hover:text-blue-500 transition" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="App.deleteItem(1769085503206)" class="text-slate-300 hover:text-red-500 transition" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50 group">
+                        <td class="p-3 font-semibold text-slate-700">Pump</td>
+                        <td class="p-3 font-mono text-slate-500 text-[10px] md:text-xs">2026</td>
+                        <td class="p-3 text-slate-600">Free zone</td>
+                        <td class="p-3"><span class="bg-blue-100 text-blue-700 px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold"><i class="fas fa-box"></i> Stock</span></td>
+                        <td class="p-3 text-center">
+                            <div class="flex justify-center gap-2">
+                                <button onclick="App.editItem(1769085484241)" class="text-slate-300 hover:text-blue-500 transition" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="App.deleteItem(1769085484241)" class="text-slate-300 hover:text-red-500 transition" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50 group">
+                        <td class="p-3 font-semibold text-slate-700">Pump</td>
+                        <td class="p-3 font-mono text-slate-500 text-[10px] md:text-xs">1236</td>
+                        <td class="p-3 text-slate-600">Rig 30</td>
+                        <td class="p-3"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold"><i class="fas fa-check-circle"></i> In Use</span></td>
+                        <td class="p-3 text-center">
+                            <div class="flex justify-center gap-2">
+                                <button onclick="App.editItem(1769085461171)" class="text-slate-300 hover:text-blue-500 transition" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="App.deleteItem(1769085461171)" class="text-slate-300 hover:text-red-500 transition" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50 group">
+                        <td class="p-3 font-semibold text-slate-700">Pump</td>
+                        <td class="p-3 font-mono text-slate-500 text-[10px] md:text-xs">S1</td>
+                        <td class="p-3 text-slate-600">Sadat</td>
+                        <td class="p-3"><span class="bg-red-100 text-red-700 px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold"><i class="fas fa-times-circle"></i> Broken</span></td>
+                        <td class="p-3 text-center">
+                            <div class="flex justify-center gap-2">
+                                <button onclick="App.editItem(1769085429124)" class="text-slate-300 hover:text-blue-500 transition" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="App.deleteItem(1769085429124)" class="text-slate-300 hover:text-red-500 transition" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50 group">
+                        <td class="p-3 font-semibold text-slate-700">Pump</td>
+                        <td class="p-3 font-mono text-slate-500 text-[10px] md:text-xs">2541</td>
+                        <td class="p-3 text-slate-600">Rig 12</td>
+                        <td class="p-3"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold"><i class="fas fa-check-circle"></i> In Use</span></td>
+                        <td class="p-3 text-center">
+                            <div class="flex justify-center gap-2">
+                                <button onclick="App.editItem(1769085412839)" class="text-slate-300 hover:text-blue-500 transition" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="App.deleteItem(1769085412839)" class="text-slate-300 hover:text-red-500 transition" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50 group">
+                        <td class="p-3 font-semibold text-slate-700">Pump</td>
+                        <td class="p-3 font-mono text-slate-500 text-[10px] md:text-xs">1234</td>
+                        <td class="p-3 text-slate-600">Rig 27</td>
+                        <td class="p-3"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold"><i class="fas fa-check-circle"></i> In Use</span></td>
+                        <td class="p-3 text-center">
+                            <div class="flex justify-center gap-2">
+                                <button onclick="App.editItem(1769085387227)" class="text-slate-300 hover:text-blue-500 transition" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="App.deleteItem(1769085387227)" class="text-slate-300 hover:text-red-500 transition" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Add/Edit Item Modal -->
+    <div id="add-item-modal" class="modal-backdrop z-50">
+        <div class="modal-content">
+            <h3 id="modal-title" class="text-xl font-bold text-slate-800 mb-6 border-b pb-3">Add New Item</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Item Name</label>
+                    <input type="text" id="input-name" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. Generator 50KVA">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Serial Number</label>
+                    <input type="text" id="input-serial" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. SN-998877">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Condition</label>
+                        <select id="input-condition" onchange="App.toggleUsageField()" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="working">✅ Working</option>
+                            <option value="broken">❌ Broken / Maintenance</option>
+                        </select>
+                    </div>
+                    
+                    <div id="usage-field-container" style="opacity: 1; pointer-events: auto;">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Usage Status</label>
+                        <select id="input-usage" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="inUse">🏗️ In Use (Site)</option>
+                            <option value="inStock">📦 In Stock (Store)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
+                    <input type="text" id="input-location" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. Rig 27 - Engine Room">
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-end gap-3">
+                <button onclick="App.closeModal('add-item-modal')" class="bg-slate-100 text-slate-700 px-6 py-2 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
+                <button id="modal-save-btn" onclick="App.saveItem()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-medium shadow transition">Save Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results Modal -->
+    <div id="search-results-modal" class="modal-backdrop z-50">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-xl font-bold text-slate-800">Search Analysis &amp; Results</h3>
+                <button onclick="App.closeModal('search-results-modal')" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4">
+                <h4 class="text-sm text-slate-500 mb-3">Analysis for: <span id="search-term-display" class="font-bold text-blue-700 text-lg">--</span></h4>
+                <div class="grid grid-cols-4 gap-3 text-center">
+                    <div class="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
+                        <span class="block text-xs text-slate-500 mb-1">Total Count</span>
+                        <span id="res-total" class="font-bold text-2xl text-slate-800">0</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm border-b-4 border-emerald-500">
+                        <span class="block text-xs text-slate-500 mb-1">Working (In Use)</span>
+                        <span id="res-used" class="font-bold text-2xl text-emerald-600">0</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm border-b-4 border-blue-500">
+                        <span class="block text-xs text-slate-500 mb-1">Working (Stock)</span>
+                        <span id="res-stock" class="font-bold text-2xl text-blue-600">0</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm border-b-4 border-red-500">
+                        <span class="block text-xs text-slate-500 mb-1">Broken</span>
+                        <span id="res-broken" class="font-bold text-2xl text-red-600">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-grow overflow-auto border rounded-lg bg-white">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-slate-100 text-slate-600 sticky top-0">
+                        <tr>
+                            <th class="p-3">Name</th>
+                            <th class="p-3">Serial</th>
+                            <th class="p-3">Location</th>
+                            <th class="p-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="search-results-body" class="divide-y">
+                        <!-- Search Results Rows -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 flex justify-end gap-2">
+                <button onclick="App.closeModal('search-results-modal')" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-300">Close</button>
+                <button onclick="App.printSearchReport()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 font-bold flex items-center gap-2 shadow-sm">
+                    <i class="fas fa-print"></i> Print Results
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report/Print Modal -->
+    <div id="report-modal" class="modal-backdrop z-50">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 id="report-modal-title" class="text-xl font-bold text-slate-800">Category Report</h3>
+                <button onclick="App.closeModal('report-modal')" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <div class="bg-blue-50 p-4 rounded-lg mb-4 text-sm text-blue-700 flex items-center gap-2">
+                <i class="fas fa-info-circle"></i>
+                <span>This list contains only items in this category.</span>
+            </div>
+
+            <div class="flex-grow overflow-auto border rounded-lg bg-white" id="report-table-container">
+                <table class="w-full text-sm text-left" id="report-table">
+                    <thead class="bg-slate-100 text-slate-600 sticky top-0">
+                        <tr>
+                            <th class="p-3">Name</th>
+                            <th class="p-3">Serial</th>
+                            <th class="p-3">Location</th>
+                            <th class="p-3">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="report-body" class="divide-y">
+                        <!-- Rows rendered here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 flex justify-end gap-2">
+                <button onclick="App.closeModal('report-modal')" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-300">Close</button>
+                <button onclick="App.printReport()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 font-bold flex items-center gap-2 shadow-sm">
+                    <i class="fas fa-print"></i> Print Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Printable Area (Hidden on Screen) -->
+    <div id="printable-content" class="hidden"></div>
+
+    <script>
+        const App = {
+            state: {
+                assets: [],
+                editingId: null
+            },
+
+            init() {
+                this.loadData();
+                this.bindEvents();
+                this.updateDashboard();
+            },
+
+            loadData() {
+                // Try to get data from localStorage, otherwise initialize empty
+                // This line is targeted by the export function to inject data
+                const saved = localStorage.getItem('dasco_asset_v1') || '[{"id":1769085387227,"name":"Pump","serial":"1234","condition":"working","usage":"inUse","location":"Rig 27","date":"22/01/2026"},{"id":1769085412839,"name":"Pump","serial":"2541","condition":"working","usage":"inUse","location":"Rig 12","date":"22/01/2026"},{"id":1769085429124,"name":"Pump","serial":"S1","condition":"broken","usage":"broken","location":"Sadat","date":"22/01/2026"},{"id":1769085461171,"name":"Pump","serial":"1236","condition":"working","usage":"inUse","location":"Rig 30","date":"22/01/2026"},{"id":1769085484241,"name":"Pump","serial":"2026","condition":"working","usage":"inStock","location":"Free zone","date":"22/01/2026"},{"id":1769085503206,"name":"Pump","serial":"2025","condition":"working","usage":"inStock","location":"Free zone","date":"22/01/2026"}]';
+                
+                if (saved) {
+                    try {
+                        this.state.assets = JSON.parse(saved);
+                    } catch(e) {
+                        this.state.assets = [];
+                    }
+                } else {
+                    this.state.assets = [];
+                }
+            },
+
+            saveData() {
+                localStorage.setItem('dasco_asset_v1', JSON.stringify(this.state.assets));
+                this.updateDashboard();
+            },
+
+            bindEvents() {
+                document.getElementById('main-search-input').addEventListener('keyup', (e) => {
+                    if(e.key === 'Enter') this.handleMainSearch();
+                });
+            },
+
+            // --- DASHBOARD LOGIC ---
+            updateDashboard() {
+                let workingUsed = 0;
+                let workingStock = 0;
+                let broken = 0;
+
+                this.state.assets.forEach(item => {
+                    if (item.condition === 'broken') {
+                        broken++;
+                    } else {
+                        if (item.usage === 'inUse') workingUsed++;
+                        else workingStock++;
+                    }
+                });
+
+                this.animateNumber('stat-working-used', workingUsed);
+                this.animateNumber('stat-working-stock', workingStock);
+                this.animateNumber('stat-broken', broken);
+
+                // ALWAYS render ALL assets in the main list
+                this.renderList(this.state.assets);
+            },
+
+            renderList(items) {
+                const tbody = document.getElementById('assets-table-body');
+                document.getElementById('total-items-badge').innerText = `Count: ${items.length}`;
+                
+                if (items.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center p-8 text-slate-400">No assets found. Add a new item.</td></tr>`;
+                    return;
+                }
+
+                // Show last 100 items by default (newest first)
+                const sorted = [...items].sort((a,b) => b.id - a.id).slice(0, 100);
+                
+                tbody.innerHTML = sorted.map(item => this.createRowHTML(item)).join('');
+            },
+
+            createRowHTML(item) {
+                let statusBadge = '';
+                
+                if (item.condition === 'broken') {
+                    statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold"><i class="fas fa-times-circle"></i> Broken</span>`;
+                } else {
+                    if (item.usage === 'inStock') statusBadge = `<span class="bg-blue-100 text-blue-700 px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold"><i class="fas fa-box"></i> Stock</span>`;
+                    else statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold"><i class="fas fa-check-circle"></i> In Use</span>`;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50 group">
+                        <td class="p-3 font-semibold text-slate-700">${item.name}</td>
+                        <td class="p-3 font-mono text-slate-500 text-[10px] md:text-xs">${item.serial || '-'}</td>
+                        <td class="p-3 text-slate-600">${item.location}</td>
+                        <td class="p-3">${statusBadge}</td>
+                        <td class="p-3 text-center">
+                            <div class="flex justify-center gap-2">
+                                <button onclick="App.editItem(${item.id})" class="text-slate-300 hover:text-blue-500 transition" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="App.deleteItem(${item.id})" class="text-slate-300 hover:text-red-500 transition" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            },
+
+            // --- SAVE LOGIC (ROBUST) ---
+            saveItem() {
+                try {
+                    const nameEl = document.getElementById('input-name');
+                    const serialEl = document.getElementById('input-serial');
+                    const conditionEl = document.getElementById('input-condition');
+                    const usageEl = document.getElementById('input-usage');
+                    const locationEl = document.getElementById('input-location');
+
+                    if (!nameEl || !serialEl || !conditionEl || !usageEl || !locationEl) {
+                        alert("Error: Form elements missing.");
+                        return;
+                    }
+
+                    const name = nameEl.value.trim();
+                    const serial = serialEl.value.trim();
+                    const condition = conditionEl.value;
+                    const usage = usageEl.value;
+                    const location = locationEl.value.trim();
+
+                    if (!name) { 
+                        alert("Please enter item name"); 
+                        nameEl.focus();
+                        return; 
+                    }
+                    if (!location) { 
+                        alert("Please specify location"); 
+                        locationEl.focus();
+                        return; 
+                    }
+
+                    if (this.state.editingId) {
+                        const itemIndex = this.state.assets.findIndex(i => i.id === this.state.editingId);
+                        if (itemIndex > -1) {
+                            this.state.assets[itemIndex] = {
+                                ...this.state.assets[itemIndex],
+                                name,
+                                serial: serial || "N/A",
+                                condition,
+                                usage: (condition === 'broken') ? 'broken' : usage,
+                                location
+                            };
+                        }
+                        this.state.editingId = null;
+                    } else {
+                        const newItem = {
+                            id: Date.now(),
+                            name,
+                            serial: serial || "N/A",
+                            condition,
+                            usage: (condition === 'broken') ? 'broken' : usage,
+                            location,
+                            date: new Date().toLocaleDateString('en-GB')
+                        };
+                        this.state.assets.push(newItem);
+                    }
+
+                    this.saveData();
+                    this.closeModal('add-item-modal');
+                    this.playTone('success');
+
+                } catch(err) {
+                    console.error("Save Error:", err);
+                    alert("Failed to save item.");
+                }
+            },
+
+            // --- EXPORT FUNCTIONALITY (FULL APP BACKUP) ---
+            exportData() {
+                // 1. Get the current HTML code of the entire page
+                const htmlContent = document.documentElement.outerHTML;
+                
+                // 2. Serialize current data to JSON and escape single quotes for string insertion
+                const currentData = JSON.stringify(this.state.assets).replace(/'/g, "\\'").replace(/\\/g, '\\\\');
+                
+                // 3. Find the specific line in loadData() and replace it to inject the data as a fallback
+                // Target: const saved = localStorage.getItem('dasco_asset_v1');
+                // Replace with: const saved = localStorage.getItem('dasco_asset_v1') || '...JSON_DATA...';
+                
+                const searchString = "const saved = localStorage.getItem('dasco_asset_v1');";
+                const replaceString = `const saved = localStorage.getItem('dasco_asset_v1') || '${currentData}';`;
+                
+                // Perform replacement
+                let newHtml = htmlContent;
+                if (htmlContent.includes(searchString)) {
+                    newHtml = htmlContent.replace(searchString, replaceString);
+                } else {
+                    // Fallback for re-exports (if the string is already modified)
+                    // We look for the pattern " || '...';" and replace the content inside quotes
+                    const reExportPattern = /const saved = localStorage\.getItem\('dasco_asset_v1'\) \|\| '.*';/;
+                    if (reExportPattern.test(htmlContent)) {
+                        newHtml = htmlContent.replace(reExportPattern, replaceString);
+                    } else {
+                        alert("Could not inject data. Exporting layout only.");
+                    }
+                }
+
+                // 4. Trigger download
+                const blob = new Blob([newHtml], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Dasco_Asset_Backup_${new Date().toISOString().slice(0,10)}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            },
+
+            // --- REPORT & PRINT LOGIC ---
+            openReport(type) {
+                let filtered = [];
+                let title = "";
+                
+                if (type === 'used') {
+                    filtered = this.state.assets.filter(i => i.condition === 'working' && i.usage === 'inUse');
+                    title = "Report: WORKING (USE)";
+                } else if (type === 'stock') {
+                    filtered = this.state.assets.filter(i => i.condition === 'working' && i.usage === 'inStock');
+                    title = "Report: WORKING (STOCK)";
+                } else if (type === 'broken') {
+                    filtered = this.state.assets.filter(i => i.condition === 'broken');
+                    title = "Report: MAINTENANCE / BROKEN";
+                }
+
+                const tbody = document.getElementById('report-body');
+                document.getElementById('report-modal-title').innerText = title;
+
+                if (filtered.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-slate-400">No items in this category.</td></tr>`;
+                } else {
+                    tbody.innerHTML = filtered.map(item => `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3 font-medium">${item.name}</td>
+                            <td class="p-3 font-mono text-slate-500">${item.serial || '-'}</td>
+                            <td class="p-3">${item.location}</td>
+                            <td class="p-3 text-slate-500 text-xs">${item.date || '-'}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                this.openModal('report-modal');
+            },
+
+            printReport() {
+                const title = document.getElementById('report-modal-title').innerText;
+                const rows = document.getElementById('report-body').innerHTML;
+                const count = document.getElementById('report-body').querySelectorAll('tr').length;
+                const date = new Date().toLocaleString();
+
+                const printable = document.getElementById('printable-content');
+                printable.innerHTML = `
+                    <h2>Dasco Asset - ${title}</h2>
+                    <div class="print-meta">Generated on: ${date} | Total Items: ${count}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Serial No.</th>
+                                <th>Location</th>
+                                <th>Date Added</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                `;
+                
+                window.print();
+            },
+
+            // --- ACTIONS ---
+            openAddModal() {
+                this.state.editingId = null;
+                document.getElementById('input-name').value = '';
+                document.getElementById('input-serial').value = '';
+                document.getElementById('input-location').value = '';
+                document.getElementById('input-condition').value = 'working';
+                document.getElementById('input-usage').value = 'inUse';
+                document.getElementById('modal-title').innerText = "Add New Item";
+                document.getElementById('modal-save-btn').innerText = "Save Item";
+                this.toggleUsageField();
+                this.openModal('add-item-modal');
+            },
+
+            editItem(id) {
+                const item = this.state.assets.find(i => i.id === id);
+                if (!item) return;
+                this.state.editingId = id;
+                document.getElementById('input-name').value = item.name;
+                document.getElementById('input-serial').value = item.serial === 'N/A' ? '' : item.serial;
+                document.getElementById('input-location').value = item.location;
+                document.getElementById('input-condition').value = item.condition;
+                if (item.condition !== 'broken') {
+                     document.getElementById('input-usage').value = item.usage;
+                } else {
+                     document.getElementById('input-usage').value = 'inUse';
+                }
+                this.toggleUsageField();
+                document.getElementById('modal-title').innerText = "Edit Item";
+                document.getElementById('modal-save-btn').innerText = "Update Item";
+                this.openModal('add-item-modal');
+            },
+
+            toggleUsageField() {
+                const cond = document.getElementById('input-condition').value;
+                const usageDiv = document.getElementById('usage-field-container');
+                if (cond === 'broken') {
+                    usageDiv.style.opacity = '0.5';
+                    usageDiv.style.pointerEvents = 'none';
+                } else {
+                    usageDiv.style.opacity = '1';
+                    usageDiv.style.pointerEvents = 'auto';
+                }
+            },
+
+            deleteItem(id) {
+                if(confirm("Are you sure you want to delete this item?")) {
+                    this.state.assets = this.state.assets.filter(i => i.id !== id);
+                    this.saveData();
+                }
+            },
+
+            // --- SEARCH ANALYSIS LOGIC ---
+            handleMainSearch() {
+                const query = document.getElementById('main-search-input').value.toLowerCase().trim();
+                if (!query) return;
+
+                const results = this.state.assets.filter(item => 
+                    item.name.toLowerCase().includes(query) || 
+                    (item.serial && item.serial.toLowerCase().includes(query))
+                );
+
+                let countTotal = results.length;
+                let countUsed = 0;
+                let countStock = 0;
+                let countBroken = 0;
+
+                results.forEach(r => {
+                    if (r.condition === 'broken') countBroken++;
+                    else {
+                        if (r.usage === 'inUse') countUsed++;
+                        else countStock++;
+                    }
+                });
+
+                document.getElementById('search-term-display').innerText = query;
+                document.getElementById('res-total').innerText = countTotal;
+                document.getElementById('res-used').innerText = countUsed;
+                document.getElementById('res-stock').innerText = countStock;
+                document.getElementById('res-broken').innerText = countBroken;
+
+                const tbody = document.getElementById('search-results-body');
+                if (countTotal === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-slate-400">No matching results found</td></tr>`;
+                } else {
+                    tbody.innerHTML = results.map(item => {
+                        let statusTxt = "";
+                        let statusColor = "";
+                        if (item.condition === 'broken') { statusTxt = "Broken"; statusColor = "text-red-600 font-bold"; }
+                        else if (item.usage === 'inStock') { statusTxt = "In Stock"; statusColor = "text-blue-600 font-bold"; }
+                        else { statusTxt = "In Use"; statusColor = "text-emerald-600 font-bold"; }
+                        return `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3">${item.name}</td>
+                            <td class="p-3 font-mono text-xs text-slate-500">${item.serial}</td>
+                            <td class="p-3 text-slate-600">${item.location}</td>
+                            <td class="p-3 ${statusColor}">${statusTxt}</td>
+                        </tr>`;
+                    }).join('');
+                }
+
+                this.openModal('search-results-modal');
+            },
+
+            printSearchReport() {
+                const term = document.getElementById('search-term-display').innerText;
+                const rows = document.getElementById('search-results-body').innerHTML;
+                const total = document.getElementById('res-total').innerText;
+                const used = document.getElementById('res-used').innerText;
+                const stock = document.getElementById('res-stock').innerText;
+                const broken = document.getElementById('res-broken').innerText;
+                
+                const date = new Date().toLocaleString();
+
+                const printable = document.getElementById('printable-content');
+                printable.innerHTML = `
+                    <h2>Dasco Asset - Search Analysis</h2>
+                    <div class="print-meta">Search Term: "${term}" | Generated on: ${date}</div>
+                    
+                    <div class="stats-box">
+                        <div><strong>Total:</strong> ${total}</div>
+                        <div><strong>In Use:</strong> ${used}</div>
+                        <div><strong>Stock:</strong> ${stock}</div>
+                        <div><strong>Broken:</strong> ${broken}</div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Serial</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                `;
+                
+                window.print();
+            },
+
+            // --- UTILITIES ---
+            animateNumber(id, endValue) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.innerText = endValue;
+            },
+            openModal(id) { document.getElementById(id).classList.add('visible'); },
+            closeModal(id) { document.getElementById(id).classList.remove('visible'); },
+            playTone(type) {
+                if (typeof Tone === 'undefined') return;
+                try {
+                    if (Tone.context.state !== 'running') Tone.context.resume().catch(() => {});
+                    const synth = new Tone.Synth().toDestination();
+                    if (type === 'success') {
+                        synth.triggerAttackRelease("E5", "8n");
+                        setTimeout(() => synth.triggerAttackRelease("A5", "8n"), 100);
+                    }
+                } catch(e) {
+                    console.log("Audio not supported or pending interaction");
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => App.init());
+        window.App = App;
+    </script>
+
+</body></html>
